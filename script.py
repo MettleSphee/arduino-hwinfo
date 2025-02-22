@@ -31,11 +31,21 @@ def Init():
 		exit()
 
 def cpu():
-	cpuFreq = str(int(psutil.cpu_freq().current)//100/10)
+	cpuFreq = int(psutil.cpu_freq().current)
+	if (cpuFreq >= 768):
+		cpufreq = str(cpuFreq//100/10)+"G"
+	else:
+		cpufreq = str(cpuFreq)+"M"
 	cpuTemp = psutil.sensors_temperatures()
 	if (cpuTemp == {}):
-		cpuTemp = "None"
-	output = "Freq: CPU Temps:"+str(cpuFreq)+"G  CPU   "+cpuTemp
+		cpuTemp = " None"
+	else:
+		coreCount = len(cpuTemp['coretemp'])
+		averageTemp = 0
+		for i in range(0,coreCount):
+			averageTemp = averageTemp + cpuTemp['coretemp'][i].current
+		averageTemp = averageTemp / coreCount
+	output = "Freq: CPU Temps:"+str(cpufreq)+"  CPU "+f"{averageTemp:.1f}C"
 	messageFunction(output)
 	time.sleep(2)
 
@@ -44,8 +54,11 @@ def battery():
 	if (battery == None):
 		output = "No battery  AC  "+"detected    only"
 	else:
-		batteryPercentage = str(battery.percent)
-		charging = "Charging" if battery.power_plugged else "Draining"
+		batteryPercentage = int(battery.percent)
+		if (batteryPercentage == 100):
+			charging = " Charged"
+		else:
+			charging = "Charging" if battery.power_plugged else "Draining"
 		output = "Battery   Status"+f"{batteryPercentage :03d}"+"%    "+charging
 	messageFunction(output)
 	time.sleep(2)
